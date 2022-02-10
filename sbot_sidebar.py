@@ -67,11 +67,11 @@ class SbotSidebarTerminalCommand(sublime_plugin.WindowCommand):
     def run(self, paths):
         if len(paths) > 0:
             path = _get_dir(paths)
-            cmd = f'wt -d "{path}"'
+            cmd = f'wt -d "{path}"' if os.name == 'nt' else f'gnome-terminal --working-directory="{path}"'
             subprocess.run(cmd, shell=True, check=True)
 
     def is_visible(self, paths):
-        vis = os.name == 'nt'
+        vis = os.name == 'nt' or os.name == 'posix'
         return vis
 
 
@@ -82,7 +82,7 @@ class SbotSidebarOpenFolderCommand(sublime_plugin.WindowCommand):
     def run(self, paths):
         if len(paths) > 0:
             path = _get_dir(paths)
-            cmd = f'explorer "{path}"'
+            cmd = f'explorer "{path}"' # I don't think this is simple with linux?
             subprocess.run(cmd, shell=True, check=True)
 
     def is_visible(self, paths):
@@ -97,7 +97,7 @@ class SbotSidebarTreeCommand(sublime_plugin.WindowCommand):
     def run(self, paths):
         if len(paths) > 0:
             path = _get_dir(paths)
-            cmd = f'tree "{path}" /a /f'
+            cmd = f'tree "{path}" /a /f' # Linux needs this installed.
             cp = subprocess.run(cmd, universal_newlines=True, capture_output=True, shell=True, check=True)
             _create_new_view(self.window, cp.stdout)
 
@@ -118,7 +118,8 @@ class SbotSidebarExecCommand(sublime_plugin.WindowCommand):
             _create_new_view(self.window, cp.stdout)
 
     def is_visible(self, paths):
-        vis = len(paths) > 0 and os.path.splitext(paths[0])[1] in ['.exe', '.cmd', '.bat', '.py', '.sh']
+        # Assumes caller knows what they are doing.
+        vis = (os.name == 'nt' or os.name == 'posix') and len(paths) > 0
         return vis
 
 
@@ -132,23 +133,25 @@ class SbotSidebarExcludeCommand(sublime_plugin.WindowCommand):
 
             exclude = paths[0]
             path = _get_dir(paths)
-            fn = self.window.project_file_name()
+            project_fn = self.window.project_file_name()
 
             # Locate the folder.
             found = False
             for folder in pdata["folders"]:
-                fpath = folder["path"]
-                apath = os.path.split(fn)[0] if(fpath == '.') else os.path.abspath(fpath)
+                folder_path = folder["path"]
+                abs_path = os.path.split(project_fn)[0] if(folder_path == '.') else os.path.abspath(folder_path)
 
-                if path.startswith(apath):
-                    # Make a relative ref.
-                    rpath = os.path.relpath(exclude, apath)
-                    patfold = "folder_exclude_patterns" if os.path.isdir(exclude) else "file_exclude_patterns"  # TODO this doesn't work for subdirs - ST thing - needs combo include/exclude
+                if path.startswith(abs_path):
+                    # Make a ref.
+                    target_path = os.path.relpath(exclude, abs_path)
+                    _, target_path = os.path.split(exclude)
+                    # print(f"exclude:{exclude} abs_path:{abs_path} target_path:{target_path}")
+                    patfold = "folder_exclude_patterns" if os.path.isdir(exclude) else "file_exclude_patterns"
 
                     try:
-                        folder[patfold].append(rpath)
+                        folder[patfold].append(target_path)
                     except Exception as e:
-                        folder[patfold] = [rpath]
+                        folder[patfold] = [target_path]
                     found = True
                     break
 
@@ -166,12 +169,12 @@ class SbotSidebarExcludeCommand(sublime_plugin.WindowCommand):
             if os.path.isdir(paths[0]):
                 pdata = self.window.project_data()
                 path = paths[0]
-                fn = self.window.project_file_name()
+                project_fn = self.window.project_file_name()
 
                 for folder in pdata["folders"]:
-                    fpath = folder["path"]
-                    apath = os.path.split(fn)[0] if fpath == '.' else os.path.abspath(fpath)
-                    if path == apath:
+                    folder_path = folder["path"]
+                    abs_path = os.path.split(project_fn)[0] if folder_path == '.' else os.path.abspath(folder_path)
+                    if path == abs_path:
                         vis = False
                         break
             # else: Just a file is ok.
