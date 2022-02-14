@@ -91,6 +91,21 @@ class SbotSidebarOpenFolderCommand(sublime_plugin.WindowCommand):
 
 
 #-----------------------------------------------------------------------------------
+class SbotSidebarOpenFileCommand(sublime_plugin.WindowCommand):
+    ''' Simple file opener. '''
+
+    def run(self, paths):
+        if len(paths) > 0:
+            fn = f'"{paths[0]}"'
+            cmd = fn if os.name == 'nt' else f'xdg-open {fn}'
+            cp = subprocess.run(cmd, universal_newlines=True, shell=True)
+
+    def is_visible(self, paths):
+        vis = (os.name == 'nt' or os.name == 'posix') and len(paths) > 0
+        return vis
+
+
+#-----------------------------------------------------------------------------------
 class SbotSidebarTreeCommand(sublime_plugin.WindowCommand):
     ''' Run tree command to clipboard. '''
 
