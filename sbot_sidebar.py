@@ -96,9 +96,11 @@ class SbotSidebarOpenFileCommand(sublime_plugin.WindowCommand):
 
     def run(self, paths):
         if len(paths) > 0:
-            fn = f'"{paths[0]}"'
-            cmd = fn if os.name == 'nt' else f'xdg-open {fn}'
-            cp = subprocess.run(cmd, universal_newlines=True, shell=True)
+
+            if os.name == 'nt':
+                os.startfile(paths[0])
+            elif os.name == 'posix':
+                subprocess.run(('xdg-open', paths[0]))
 
     def is_visible(self, paths):
         vis = (os.name == 'nt' or os.name == 'posix') and len(paths) > 0
