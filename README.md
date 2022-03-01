@@ -4,6 +4,7 @@ but it has too much extra stuff. This has just the basics and can be extended in
 
 Built for ST4 on Windows and Linux (with a couple of exceptions).
 
+
 ## Commands
 | Command                  | Implementation | Description |
 |:--------                 |:-------        |:-------     |
@@ -19,4 +20,7 @@ Built for ST4 on Windows and Linux (with a couple of exceptions).
 | sbot_sidebar_exclude     | Sidebar        | Hide selected file/dir in project |
 
 ## Settings
-None
+No internal but the right click stuff works better with this setting:
+```
+"preview_on_click": "only_left",
+```

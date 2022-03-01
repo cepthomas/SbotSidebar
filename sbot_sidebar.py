@@ -82,21 +82,20 @@ class SbotSidebarOpenFolderCommand(sublime_plugin.WindowCommand):
     def run(self, paths):
         if len(paths) > 0:
             path = _get_dir(paths)
-            cmd = f'explorer "{path}"' # I don't think this is simple with linux?
+            cmd = f'explorer "{path}"'
             subprocess.run(cmd, shell=True, check=True)
 
     def is_visible(self, paths):
-        vis = os.name == 'nt' and len(paths) > 0
+        vis = os.name == 'nt' and len(paths) > 0  # linux depends on app installed e.g. Nautilus.
         return vis
 
 
 #-----------------------------------------------------------------------------------
 class SbotSidebarOpenFileCommand(sublime_plugin.WindowCommand):
-    ''' Simple file opener. '''
+    ''' Simple file opener, like you double clicked it. Should this merge with SbotSidebarExecCommand? '''
 
     def run(self, paths):
         if len(paths) > 0:
-
             if os.name == 'nt':
                 os.startfile(paths[0])
             elif os.name == 'posix':
@@ -109,7 +108,7 @@ class SbotSidebarOpenFileCommand(sublime_plugin.WindowCommand):
 
 #-----------------------------------------------------------------------------------
 class SbotSidebarTreeCommand(sublime_plugin.WindowCommand):
-    ''' Run tree command to clipboard. '''
+    ''' Run tree command to a new view. '''
 
     def run(self, paths):
         if len(paths) > 0:
