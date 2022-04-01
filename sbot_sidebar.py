@@ -7,18 +7,6 @@ import sublime_plugin
 
 
 #-----------------------------------------------------------------------------------
-def plugin_loaded():
-    # print(">>> SbotSidebar plugin_loaded()")
-    pass
-
-
-#-----------------------------------------------------------------------------------
-def plugin_unloaded():
-    # print("SbotSidebar plugin_unloaded()")
-    pass
-
-
-#-----------------------------------------------------------------------------------
 class SbotSidebarCopyNameCommand(sublime_plugin.WindowCommand):
     ''' Get file name to clipboard. '''
 
@@ -113,7 +101,7 @@ class SbotSidebarTreeCommand(sublime_plugin.WindowCommand):
     def run(self, paths):
         if len(paths) > 0:
             path = _get_dir(paths)
-            cmd = f'tree "{path}" /a /f' # Linux needs this installed.
+            cmd = f'tree "{path}" /a /f'  # Linux needs this installed.
             cp = subprocess.run(cmd, universal_newlines=True, capture_output=True, shell=True, check=True)
             _create_new_view(self.window, cp.stdout)
 
@@ -166,7 +154,7 @@ class SbotSidebarExcludeCommand(sublime_plugin.WindowCommand):
 
                     try:
                         folder[patfold].append(target_path)
-                    except Exception as e:
+                    except:
                         folder[patfold] = [target_path]
                     found = True
                     break
