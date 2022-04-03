@@ -2,6 +2,7 @@ import os
 import subprocess
 import webbrowser
 import shutil
+import platform
 import sublime
 import sublime_plugin
 
@@ -55,11 +56,11 @@ class SbotSidebarTerminalCommand(sublime_plugin.WindowCommand):
     def run(self, paths):
         if len(paths) > 0:
             path = _get_dir(paths)
-            cmd = f'wt -d "{path}"' if os.name == 'nt' else f'gnome-terminal --working-directory="{path}"'
+            cmd = f'wt -d "{path}"' if platform.system() == 'Windows' else f'gnome-terminal --working-directory="{path}"'
             subprocess.run(cmd, shell=True, check=True)
 
     def is_visible(self, paths):
-        vis = os.name == 'nt' or os.name == 'posix'
+        vis = platform.system() == 'Windows' or platform.system() == 'Linux'
         return vis
 
 
@@ -74,23 +75,23 @@ class SbotSidebarOpenFolderCommand(sublime_plugin.WindowCommand):
             subprocess.run(cmd, shell=True, check=True)
 
     def is_visible(self, paths):
-        vis = os.name == 'nt' and len(paths) > 0  # linux depends on app installed e.g. Nautilus.
+        vis = platform.system() == 'Windows' and len(paths) > 0  # linux depends on app installed e.g. Nautilus.
         return vis
 
 
 #-----------------------------------------------------------------------------------
 class SbotSidebarOpenFileCommand(sublime_plugin.WindowCommand):
-    ''' Simple file opener, like you double clicked it. Should this merge with SbotSidebarExecCommand? '''
+    ''' Simple file opener, like you double clicked it. TODO Should this merge with SbotSidebarExecCommand? '''
 
     def run(self, paths):
         if len(paths) > 0:
-            if os.name == 'nt':
+            if platform.system() == 'Windows':
                 os.startfile(paths[0])
-            elif os.name == 'posix':
+            elif platform.system() == 'Linux':
                 subprocess.run(('xdg-open', paths[0]))
 
     def is_visible(self, paths):
-        vis = (os.name == 'nt' or os.name == 'posix') and len(paths) > 0
+        vis = (platform.system() == 'Windows' or platform.system() == 'Linux') and len(paths) > 0
         return vis
 
 
@@ -106,7 +107,7 @@ class SbotSidebarTreeCommand(sublime_plugin.WindowCommand):
             _create_new_view(self.window, cp.stdout)
 
     def is_visible(self, paths):
-        vis = os.name == 'nt' and len(paths) > 0
+        vis = platform.system() == 'Windows' and len(paths) > 0
         return vis
 
 
@@ -123,7 +124,7 @@ class SbotSidebarExecCommand(sublime_plugin.WindowCommand):
 
     def is_visible(self, paths):
         # Assumes caller knows what they are doing.
-        vis = (os.name == 'nt' or os.name == 'posix') and len(paths) > 0
+        vis = (platform.system() == 'Windows' or platform.system() == 'Linux') and len(paths) > 0
         return vis
 
 
