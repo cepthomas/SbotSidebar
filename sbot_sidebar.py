@@ -81,7 +81,7 @@ class SbotSidebarOpenFolderCommand(sublime_plugin.WindowCommand):
 
 #-----------------------------------------------------------------------------------
 class SbotSidebarOpenFileCommand(sublime_plugin.WindowCommand):
-    ''' Simple file opener, like you double clicked it. TODO Should this merge with SbotSidebarExecCommand? '''
+    ''' Simple file opener, like you double clicked it. TODO Should this merge with SbotSidebarExecCommand? Check other overlaps '''
 
     def run(self, paths):
         if len(paths) > 0:
@@ -130,7 +130,7 @@ class SbotSidebarExecCommand(sublime_plugin.WindowCommand):
 
 #-----------------------------------------------------------------------------------
 class SbotSidebarExcludeCommand(sublime_plugin.WindowCommand):
-    ''' Remove from project. Supplements builtin remove_folder. '''
+    ''' Remove from project. Supplements builtin remove_folder. TODO works? '''
 
     def run(self, paths):
         if len(paths) > 0:
@@ -153,10 +153,10 @@ class SbotSidebarExcludeCommand(sublime_plugin.WindowCommand):
                     # print(f"exclude:{exclude} abs_path:{abs_path} target_path:{target_path}")
                     patfold = "folder_exclude_patterns" if os.path.isdir(exclude) else "file_exclude_patterns"
 
-                    try:
-                        folder[patfold].append(target_path)
-                    except:
+                    if patfold not in folder:
                         folder[patfold] = [target_path]
+                    else:
+                        folder[patfold].append(target_path)
                     found = True
                     break
 
