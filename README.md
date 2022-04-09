@@ -4,6 +4,8 @@ but it has too much extra stuff. This has just the basics and can be extended in
 
 Built for ST4 on Windows and Linux (with a couple of exceptions).
 
+Note that `sbot_sidebar_exclude` is limited to how `folder_exclude_patterns` works.
+
 
 ## Commands
 | Command                    | Implementation | Description | Args      |
@@ -12,7 +14,6 @@ Built for ST4 on Windows and Linux (with a couple of exceptions).
 | `sbot_sidebar_copy_path`   | Sidebar        | Copy full file/dir path to clipboard                |  |
 | `sbot_sidebar_copy_file`   | Sidebar        | Copy selected file to a new file in the same folder |  |
 | `sbot_sidebar_terminal`    | Sidebar        | Open a terminal here                                |  |
-| `sbot_sidebar_open_file`   | Sidebar        | Open a file using its default application           |  |
 | `sbot_sidebar_open_folder` | Sidebar        | Open a Windows Explorer here (win only)             |  |
 | `sbot_sidebar_open_browser`| Sidebar        | Open html file in your browser                      |  |
 | `sbot_sidebar_tree`        | Sidebar        | Run tree cmd to new view (win only)                 |  |

@@ -12,7 +12,6 @@ class SbotSidebarCopyNameCommand(sublime_plugin.WindowCommand):
     ''' Get file name to clipboard. '''
 
     def run(self, paths):
-        print(paths)
         names = (os.path.split(path)[1] for path in paths)
         sublime.set_clipboard('\n'.join(names))
 
@@ -72,26 +71,13 @@ class SbotSidebarOpenFolderCommand(sublime_plugin.WindowCommand):
         if len(paths) > 0:
             path = _get_dir(paths)
             cmd = f'explorer "{path}"'
-            subprocess.run(cmd, shell=True, check=True)
+            try:
+                subprocess.run(cmd, shell=True, check=True)
+            except Exception as e:
+                _create_new_view(self.window, f'Well, that did not go well: {e}')
 
     def is_visible(self, paths):
         vis = platform.system() == 'Windows' and len(paths) > 0  # linux depends on app installed e.g. Nautilus.
-        return vis
-
-
-#-----------------------------------------------------------------------------------
-class SbotSidebarOpenFileCommand(sublime_plugin.WindowCommand):
-    ''' Simple file opener, like you double clicked it. TODO Should this merge with SbotSidebarExecCommand? Check other overlaps '''
-
-    def run(self, paths):
-        if len(paths) > 0:
-            if platform.system() == 'Windows':
-                os.startfile(paths[0])
-            elif platform.system() == 'Linux':
-                subprocess.run(('xdg-open', paths[0]))
-
-    def is_visible(self, paths):
-        vis = (platform.system() == 'Windows' or platform.system() == 'Linux') and len(paths) > 0
         return vis
 
 
@@ -103,24 +89,48 @@ class SbotSidebarTreeCommand(sublime_plugin.WindowCommand):
         if len(paths) > 0:
             path = _get_dir(paths)
             cmd = f'tree "{path}" /a /f'  # Linux needs this installed.
-            cp = subprocess.run(cmd, universal_newlines=True, capture_output=True, shell=True, check=True)
-            _create_new_view(self.window, cp.stdout)
+            try:
+                cp = subprocess.run(cmd, universal_newlines=True, capture_output=True, shell=True, check=True)
+                _create_new_view(self.window, cp.stdout)
+            except Exception as e:
+                _create_new_view(self.window, f'Well, that did not go well: {e}')
 
     def is_visible(self, paths):
         vis = platform.system() == 'Windows' and len(paths) > 0
         return vis
 
 
+# #-----------------------------------------------------------------------------------
+# class SbotSidebarOpenFileCommand(sublime_plugin.WindowCommand):
+#     ''' Simple file opener using default application, like you double clicked it.
+#
+#     def run(self, paths):
+#         if len(paths) > 0:
+#             if platform.system() == 'Windows':
+#                 os.startfile(paths[0])
+#             elif platform.system() == 'Linux':
+#                 subprocess.run(('xdg-open', paths[0]))
+#
+#     def is_visible(self, paths):
+#         vis = (platform.system() == 'Windows' or platform.system() == 'Linux') and len(paths) > 0
+#         return vis
+
+
 #-----------------------------------------------------------------------------------
 class SbotSidebarExecCommand(sublime_plugin.WindowCommand):
-    ''' Simple executioner for exes/cmds without args. '''
+    ''' Simple executioner for exes/cmds without args, like you double clicked it. '''
 
     def run(self, paths):
         if len(paths) > 0:
-            path = _get_dir(paths)
+            dir = _get_dir(paths)
             cmd = ['python', paths[0]] if paths[0].endswith('.py') else [paths[0]]
-            cp = subprocess.run(cmd, universal_newlines=True, capture_output=True, shell=True, check=True, cwd=path)
-            _create_new_view(self.window, cp.stdout)
+
+            try:
+                cp = subprocess.run(cmd, universal_newlines=True, capture_output=True, shell=True, check=True, cwd=dir)
+                if(len(cp.stdout) > 0):
+                    _create_new_view(self.window, cp.stdout)
+            except Exception as e:
+                _create_new_view(self.window, f'Well, that did not go well: {e}')
 
     def is_visible(self, paths):
         # Assumes caller knows what they are doing.
@@ -130,7 +140,7 @@ class SbotSidebarExecCommand(sublime_plugin.WindowCommand):
 
 #-----------------------------------------------------------------------------------
 class SbotSidebarExcludeCommand(sublime_plugin.WindowCommand):
-    ''' Remove from project. Supplements builtin remove_folder. TODO works? '''
+    ''' Remove a dir from project. Supplements builtin remove_folder, sort of. '''
 
     def run(self, paths):
         if len(paths) > 0:
@@ -150,7 +160,6 @@ class SbotSidebarExcludeCommand(sublime_plugin.WindowCommand):
                     # Make a ref.
                     target_path = os.path.relpath(exclude, abs_path)
                     _, target_path = os.path.split(exclude)
-                    # print(f"exclude:{exclude} abs_path:{abs_path} target_path:{target_path}")
                     patfold = "folder_exclude_patterns" if os.path.isdir(exclude) else "file_exclude_patterns"
 
                     if patfold not in folder:
