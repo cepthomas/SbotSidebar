@@ -6,6 +6,11 @@ import platform
 import sublime
 import sublime_plugin
 
+try:
+    from SbotCommon.sbot_common import create_new_view
+except ModuleNotFoundError as e:
+    sublime.message_dialog('SbotSidebar plugin requires SbotCommon plugin')
+
 
 #-----------------------------------------------------------------------------------
 class SbotSidebarCopyNameCommand(sublime_plugin.WindowCommand):
@@ -74,7 +79,7 @@ class SbotSidebarOpenFolderCommand(sublime_plugin.WindowCommand):
             try:
                 subprocess.run(cmd, shell=True, check=True)
             except Exception as e:
-                _create_new_view(self.window, f'Well, that did not go well: {e}')
+                create_new_view(self.window, f'Well, that did not go well: {e}')
 
     def is_visible(self, paths):
         vis = platform.system() == 'Windows' and len(paths) > 0  # linux depends on app installed e.g. Nautilus.
@@ -91,29 +96,13 @@ class SbotSidebarTreeCommand(sublime_plugin.WindowCommand):
             cmd = f'tree "{path}" /a /f'  # Linux needs this installed.
             try:
                 cp = subprocess.run(cmd, universal_newlines=True, capture_output=True, shell=True, check=True)
-                _create_new_view(self.window, cp.stdout)
+                create_new_view(self.window, cp.stdout)
             except Exception as e:
-                _create_new_view(self.window, f'Well, that did not go well: {e}')
+                create_new_view(self.window, f'Well, that did not go well: {e}')
 
     def is_visible(self, paths):
         vis = platform.system() == 'Windows' and len(paths) > 0
         return vis
-
-
-# #-----------------------------------------------------------------------------------
-# class SbotSidebarOpenFileCommand(sublime_plugin.WindowCommand):
-#     ''' Simple file opener using default application, like you double clicked it.
-#
-#     def run(self, paths):
-#         if len(paths) > 0:
-#             if platform.system() == 'Windows':
-#                 os.startfile(paths[0])
-#             elif platform.system() == 'Linux':
-#                 subprocess.run(('xdg-open', paths[0]))
-#
-#     def is_visible(self, paths):
-#         vis = (platform.system() == 'Windows' or platform.system() == 'Linux') and len(paths) > 0
-#         return vis
 
 
 #-----------------------------------------------------------------------------------
@@ -128,9 +117,9 @@ class SbotSidebarExecCommand(sublime_plugin.WindowCommand):
             try:
                 cp = subprocess.run(cmd, universal_newlines=True, capture_output=True, shell=True, check=True, cwd=dir)
                 if(len(cp.stdout) > 0):
-                    _create_new_view(self.window, cp.stdout)
+                    create_new_view(self.window, cp.stdout)
             except Exception as e:
-                _create_new_view(self.window, f'Well, that did not go well: {e}')
+                create_new_view(self.window, f'Well, that did not go well: {e}')
 
     def is_visible(self, paths):
         # Assumes caller knows what they are doing.
@@ -208,15 +197,6 @@ class SbotSidebarOpenBrowserCommand(sublime_plugin.WindowCommand):
     def is_visible(self, paths):
         vis = len(paths) > 0 and os.path.splitext(paths[0])[1] in ['.html', '.svg']
         return vis
-
-
-#-----------------------------------------------------------------------------------
-def _create_new_view(window, text):
-    ''' Creates a temp view with text. Returns the view.'''
-    vnew = window.new_file()
-    vnew.set_scratch(True)
-    vnew.run_command('append', {'characters': text})  # insert has some odd behavior - indentation
-    return vnew
 
 
 #-----------------------------------------------------------------------------------

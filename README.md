@@ -4,6 +4,8 @@ but it has too much extra stuff. This has just the basics and can be extended in
 
 Built for ST4 on Windows and Linux (with a couple of exceptions).
 
+Requires SbotCommon plugin.
+
 Note that `sbot_sidebar_exclude` is limited to how `folder_exclude_patterns` works.
 
 
