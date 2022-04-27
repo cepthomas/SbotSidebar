@@ -9,6 +9,7 @@ import sublime_plugin
 try:
     from SbotCommon.sbot_common import create_new_view, slog
 except ModuleNotFoundError:
+    sublime.message_dialog('SbotSidebar plugin requires SbotCommon plugin')
     raise ImportError('SbotSidebar plugin requires SbotCommon plugin')
 
 
